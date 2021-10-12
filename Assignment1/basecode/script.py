@@ -292,12 +292,12 @@ for lambd in lambdas:
     mses_data.append(mses3[i])
     lam.append(lambd)
     i = i + 1
-fields = ['LAMBDAS', 'TRAINING DATA', 'TESTING DATA']
-filename = "Opt_Lambda.csv"
-with open(filename, 'w') as csvfile:
-    csvwriter = csv.writer(csvfile)
-    csvwriter.writerow(fields)
-    csvwriter.writerows(test_data)
+# fields = ['LAMBDAS', 'TRAINING DATA', 'TESTING DATA']
+# filename = "Opt_Lambda.csv"
+# with open(filename, 'w') as csvfile:
+#     csvwriter = csv.writer(csvfile)
+#     csvwriter.writerow(fields)
+#     csvwriter.writerows(test_data)
 fig = plt.figure(figsize=[12, 6])
 plt.subplot(1, 2, 1)
 plt.plot(lambdas, mses3_train)
@@ -324,7 +324,9 @@ for lambd in lambdas:
     w_l = np.reshape(w_l, [len(w_l), 1])
     mses4_train[i] = testOLERegression(w_l, X_i, y)
     mses4[i] = testOLERegression(w_l, Xtest_i, ytest)
+  #  print((lambd, mses4_train[i], mses4[i]))
     i = i + 1
+
 fig = plt.figure(figsize=[12, 6])
 plt.subplot(1, 2, 1)
 plt.plot(lambdas, mses4_train)
@@ -346,6 +348,8 @@ pmax = 7
 lambda_opt = lam[argmin(mses_data)]
 mses5_train = np.zeros((pmax, 2))
 mses5 = np.zeros((pmax, 2))
+train_test_WD = []
+train_test_With = []
 for p in range(pmax):
     Xd = mapNonLinear(X[:, 2], p)
     Xdtest = mapNonLinear(Xtest[:, 2], p)
@@ -355,6 +359,21 @@ for p in range(pmax):
     w_d2 = learnRidgeRegression(Xd, y, lambda_opt)
     mses5_train[p, 1] = testOLERegression(w_d2, Xd, y)
     mses5[p, 1] = testOLERegression(w_d2, Xdtest, ytest)
+    train_test_WD.append((p, mses5_train[p, 0], mses5[p, 0]))
+    train_test_With.append((p, mses5_train[p, 1], mses5[p, 1]))
+# fields = ['p', 'TRAINING DATA', 'TESTING DATA']
+
+
+# filename1 = "without_regression.csv"
+# filename2 = "with_regression.csv"
+# with open(filename1, 'w') as csvfile:
+#     csvwriter = csv.writer(csvfile)
+#     csvwriter.writerow(fields)
+#     csvwriter.writerows(train_test_WD)
+# with open(filename2, 'w') as csvfile:
+#     csvwriter = csv.writer(csvfile)
+#     csvwriter.writerow(fields)
+#     csvwriter.writerows(train_test_With)
 
 fig = plt.figure(figsize=[12, 6])
 plt.subplot(1, 2, 1)
