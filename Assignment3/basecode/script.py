@@ -7,6 +7,8 @@ from math import sqrt
 from sklearn import svm, metrics
 from sklearn.svm import SVC
 import time
+import csv
+
 
 def preprocess():
     """
@@ -95,8 +97,10 @@ def preprocess():
     test_data = test_data/255.0
     return train_data, train_label, validation_data, validation_label, test_data, test_label
 
+
 def sigmoid(z):
     return 1.0/(1.0 + np.exp(-z))
+
 
 def blrObjFunction(params, *args):
     """
@@ -143,6 +147,7 @@ def blrObjFunction(params, *args):
     return error, grad_error
     return error, grad_error
 
+
 def blrPredict(W, data):
     """
      blrObjFunction predicts the label of data given the data and parameter W
@@ -170,6 +175,7 @@ def blrPredict(W, data):
     label = np.argmax(b, 1)
     label.resize((data.shape[0], 1))
     return label
+
 
 def mlrObjFunction(params, *args):
     """
@@ -201,13 +207,13 @@ def mlrObjFunction(params, *args):
     ones_bias = np.ones((num_data, 1))
     train_data = np.concatenate((ones_bias, train_data), axis=1)
 
-    #Weight vector created by reshaping
+    # Weight vector created by reshaping
     weight_vec = params.reshape(num_feature + 1, n_class)
 
     # Theta matrix created
     theta = np.zeros((num_data, n_class))
 
-    #Perform dot product and sum
+    # Perform dot product and sum
     dp_weight_vec_X = np.dot(train_data, weight_vec)
     theta_sum_matrix = np.sum(np.exp(dp_weight_vec_X),
                               axis=1).reshape(num_data, 1)
@@ -223,6 +229,7 @@ def mlrObjFunction(params, *args):
     grad_error = (np.dot(train_data.T, subtract_theta_y))
 
     return error, grad_error
+
 
 def mlrPredict(W, data):
     """
@@ -243,7 +250,7 @@ def mlrPredict(W, data):
     ##################
     # HINT: Do not forget to add the bias term to your input data
 
-    #bias term. created and added to the data
+    # bias term. created and added to the data
     bias_ones = np.ones((data.shape[0], 1))
     train_data = np.concatenate((bias_ones, data), axis=1)
 
@@ -256,6 +263,7 @@ def mlrPredict(W, data):
         label[i] = np.argmax(posterior[i])
     label = label.reshape(label.shape[0], 1)
     return label
+
 
 """
 <br>
@@ -373,19 +381,25 @@ print('\n Validation set Accuracy: ' +
       str(am.score(validation_data, validation_label)*100) + '%')
 print('\n Testing set Accuracy: ' +
       str(am.score(test_data, test_label)*100) + '%')
-
+table_rows = []
 for i in range(10, 110, 10):
     am = SVC(kernel='rbf', C=i)
     am.fit(train_data, train_label)
     print('\n\n Accuracy using rbf kernel and gamma value default and C value = ', i, '\n\n')
-    print('\n Training set Accuracy: ' +
-          str(am.score(train_data, train_label)*100) + '%')
-    print('\n Validation set Accuracy: ' +
-          str(am.score(validation_data, validation_label)*100) + '%')
-    print('\n Testing set Accuracy: ' +
-          str(am.score(test_data, test_label)*100) + '%')
+    tr_s_a = str(am.score(train_data, train_label)*100) + '%'
+    print('\n Training set Accuracy: ' + tr_s_a)
+    v_s_a = str(am.score(validation_data, validation_label)*100) + '%'
+    print('\n Validation set Accuracy: ' + v_s_a)
+    te_s_a = str(am.score(test_data, test_label)*100) + '%'
+    print('\n Testing set Accuracy: ' + te_s_a)
+    table_rows.append([i, tr_s_a, v_s_a, te_s_a])
 
-### FOR EXTRA CREDIT
+with open("svm_rbf_table.csv", "w") as file:
+    file_writer = csv.writer(file)
+    file_writer.writerow(["C", "Training", "Validation", "Testing"])
+    file_writer.writerows(table_rows)
+
+    # FOR EXTRA CREDIT
 
 Wb = np.zeros((num_feature + 1, n_class))
 initial_weights_b = np.zeros((num_feature + 1, n_class))
@@ -393,20 +407,20 @@ b_opts = {'maxiter': 100}
 
 b_args = (train_data, T)
 nn_params = minimize(mlrObjFunction, initial_weights_b,
-                    jac=True, args=b_args, method='CG', options=b_opts)
+                     jac=True, args=b_args, method='CG', options=b_opts)
 Wb = nn_params.x.reshape((num_feature + 1, n_class))
 
 # Find the accuracy on Training Dataset
 b_predicted_label = mlrPredict(Wb, train_data)
 print('\n Training set Accuracy:' + str(100 *
-     np.mean((b_predicted_label == train_label).astype(float))) + '%')
+                                        np.mean((b_predicted_label == train_label).astype(float))) + '%')
 
 # Find the accuracy on Validation Dataset
 b_predicted_label = mlrPredict(Wb, validation_data)
 print('\n Validation set Accuracy:' + str(100 *
-     np.mean((b_predicted_label == validation_label).astype(float))) + '%')
+                                          np.mean((b_predicted_label == validation_label).astype(float))) + '%')
 
 # Find the accuracy on Testing Dataset
 b_predicted_label = mlrPredict(Wb, test_data)
 print('\n Testing set Accuracy:' + str(100 *
-     np.mean((b_predicted_label == test_label).astype(float))) + '%')
+                                       np.mean((b_predicted_label == test_label).astype(float))) + '%')
